@@ -3,9 +3,20 @@
 import { useState, useEffect } from 'react';
 import { Clock, Calendar, ArrowRightLeft, Loader2, Train } from 'lucide-react';
 
+interface TrainData {
+  number: string;
+  name: string;
+  src: string;
+  dst: string;
+  time: string;
+  displayTime?: string;
+  day?: string;
+  sortValue?: number;
+}
+
 export default function TrainsPage() {
   const [direction, setDirection] = useState<'BTA_PNBE' | 'PNBE_BTA'>('BTA_PNBE');
-  const [trains, setTrains] = useState<any[]>([]);
+  const [trains, setTrains] = useState<TrainData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,7 +38,7 @@ export default function TrainsPage() {
     fetchTrains();
   }, [direction]);
 
-  function processAndSetTrains(rawTrains: any[]) {
+  function processAndSetTrains(rawTrains: TrainData[]) {
     const now = new Date();
     const istTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
     const currentMinutes = istTime.getHours() * 60 + istTime.getMinutes();
@@ -51,7 +62,7 @@ export default function TrainsPage() {
       return { ...train, displayTime, day, sortValue };
     });
 
-    processed.sort((a, b) => a.sortValue - b.sortValue);
+    processed.sort((a, b) => (a.sortValue || 0) - (b.sortValue || 0));
     setTrains(processed);
   }
 
