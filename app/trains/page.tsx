@@ -1,77 +1,50 @@
 import { getSheetData } from '../../lib/google-sheets';
-import { Clock, Calendar } from 'lucide-react';
+import { Clock } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function TrainsPage() {
   const rows = await getSheetData('Trains!A2:E'); 
-
   const now = new Date();
   const istTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
   const currentMinutes = istTime.getHours() * 60 + istTime.getMinutes();
 
   const processedTrains = rows.map((train) => {
-    const name = train[0];
-    const number = train[1];
-    const timeString = train[4]; 
-
+    const name = train[0]; const number = train[1]; const timeString = train[4]; 
     if (!timeString || !name) return null;
-
     const [hours, minutes] = timeString.split(':').map(Number);
     const trainMinutes = hours * 60 + minutes;
-
-    let day = "Today";
-    let sortValue = trainMinutes;
-
-    if (trainMinutes < currentMinutes) {
-      day = "Tomorrow";
-      sortValue += 24 * 60;
-    }
-
+    let day = "Today"; let sortValue = trainMinutes;
+    if (trainMinutes < currentMinutes) { day = "Tomorrow"; sortValue += 24 * 60; }
     const ampm = hours >= 12 ? 'PM' : 'AM';
-    const displayHour = hours % 12 || 12;
-    const displayTime = `${displayHour}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-
+    const displayTime = `${hours % 12 || 12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
     return { name, number, displayTime, day, sortValue };
-  }).filter(Boolean);
-
-  processedTrains.sort((a, b) => a!.sortValue - b!.sortValue);
+  }).filter(Boolean).sort((a, b) => a!.sortValue - b!.sortValue);
 
   return (
-    <div className="min-h-screen p-6 md:p-12 max-w-3xl mx-auto pb-32">
-      <header className="mb-10 mt-4 md:mt-0">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Train Schedule</h1>
-        <p className="text-text-secondary">Bihta Station ➔ Patna Junction</p>
+    <div className="min-h-screen px-4 py-6 md:p-12 max-w-md mx-auto pb-28">
+      <header className="mb-6">
+        <h1 className="text-2xl font-bold tracking-tight text-white">Train Schedule</h1>
+        <p className="text-sm text-text-secondary mt-1">Bihta ➔ Patna Jn.</p>
       </header>
 
-      {processedTrains.length === 0 ? (
-        <div className="bg-surface/50 border border-border-subtle p-8 rounded-3xl text-center">
-          <p className="text-text-secondary">No trains found. Please check the Google Sheet.</p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {processedTrains.map((train, index) => (
-            <div key={index} className={`group bg-surface border border-border-subtle p-5 rounded-2xl flex justify-between items-center hover:bg-surface-hover transition-colors ${train!.day === 'Tomorrow' ? 'opacity-60' : ''}`}>
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-3">
-                  <span className="bg-accent/10 text-accent text-xs px-2 py-1 rounded-md font-mono font-bold tracking-wider">{train!.number}</span>
-                  <h3 className="font-semibold text-white text-lg tracking-tight">{train!.name}</h3>
-                </div>
-                <div className="flex items-center gap-1.5 mt-1">
-                  <Calendar size={14} className={train!.day === 'Today' ? 'text-green-400' : 'text-text-secondary'} />
-                  <span className={`text-sm font-medium ${train!.day === 'Today' ? 'text-green-400' : 'text-text-secondary'}`}>{train!.day}</span>
-                </div>
-              </div>
-              <div className="flex flex-col items-end">
-                <div className="flex items-center gap-2 bg-surface-hover border border-border-subtle px-4 py-2.5 rounded-xl">
-                  <Clock size={16} className={train!.day === 'Today' ? 'text-white' : 'text-text-secondary'} />
-                  <span className={`text-xl font-bold tracking-tight ${train!.day === 'Today' ? 'text-white' : 'text-text-secondary'}`}>{train!.displayTime}</span>
-                </div>
+      <div className="flex flex-col gap-3">
+        {processedTrains.map((train, index) => (
+          <div key={index} className={`bg-surface border border-border-subtle p-3.5 rounded-2xl flex justify-between items-center ${train!.day === 'Tomorrow' ? 'opacity-50' : ''}`}>
+            <div className="flex flex-col">
+              <h3 className="text-[15px] font-semibold text-white">{train!.name}</h3>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-[10px] font-mono font-bold text-accent bg-accent/10 px-1.5 py-0.5 rounded uppercase">{train!.number}</span>
+                {train!.day === 'Tomorrow' && <span className="text-[10px] text-text-secondary">Tomorrow</span>}
               </div>
             </div>
-          ))}
-        </div>
-      )}
+            <div className="flex items-center gap-1.5 bg-surface-hover px-3 py-1.5 rounded-xl border border-border-subtle">
+              <Clock size={14} className={train!.day === 'Today' ? 'text-accent' : 'text-text-secondary'} />
+              <span className={`text-[13px] font-bold ${train!.day === 'Today' ? 'text-white' : 'text-text-secondary'}`}>{train!.displayTime}</span>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
