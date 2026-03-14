@@ -35,19 +35,31 @@ export default function TrainsPage() {
       const res = await fetchTrainsBetweenStations(fromStation, toStation, targetDate);
       
       if (res && res.success) {
-        // --- THE SORTING BRAIN ---
-        // This takes the departure time (e.g. "14:30") and converts it to minutes so they sort chronologically
-        const sortedTrains = [...res.trains].sort((a, b) => {
+        // Get the current time in IST in minutes
+        const now = new Date();
+        const istTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+        const currentMinutes = istTime.getHours() * 60 + istTime.getMinutes();
+
+        // 1. FILTER: If looking at "Today", remove trains that have already left
+        const filteredTrains = res.trains.filter((train: any) => {
+          if (day === 'tomorrow') return true; // Show everything for tomorrow
+          
+          const time = train.from_std || train.departureTime || train.from_time || "23:59";
+          const [hours, mins] = time.split(':').map(Number);
+          const trainMinutes = (hours || 0) * 60 + (mins || 0);
+          
+          return trainMinutes >= currentMinutes; // Only keep trains in the future
+        });
+
+        // 2. SORT: Chronologically 
+        const sortedTrains = filteredTrains.sort((a: any, b: any) => {
           const timeA = a.from_std || a.departureTime || a.from_time || "23:59";
           const timeB = b.from_std || b.departureTime || b.from_time || "23:59";
           
           const [hoursA, minsA] = timeA.split(':').map(Number);
           const [hoursB, minsB] = timeB.split(':').map(Number);
           
-          const totalMinsA = (hoursA || 0) * 60 + (minsA || 0);
-          const totalMinsB = (hoursB || 0) * 60 + (minsB || 0);
-          
-          return totalMinsA - totalMinsB;
+          return ((hoursA || 0) * 60 + (minsA || 0)) - ((hoursB || 0) * 60 + (minsB || 0));
         });
 
         setTrains(sortedTrains);
@@ -98,7 +110,7 @@ export default function TrainsPage() {
           </div>
         ) : trains.length === 0 ? (
           <div className="bg-surface border border-border-subtle p-6 rounded-2xl text-center flex flex-col gap-3">
-            <p className="text-[13px] text-text-secondary">No trains found.</p>
+            <p className="text-[13px] text-text-secondary">No upcoming trains found for the rest of today.</p>
             {debugMsg && (
               <div className="bg-black/50 p-3 rounded-lg border border-red-500/20 text-left overflow-x-auto">
                 <span className="text-[10px] text-red-400 font-mono break-all">{debugMsg}</span>
