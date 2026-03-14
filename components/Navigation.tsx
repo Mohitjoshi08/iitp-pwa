@@ -2,13 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Store, Train, Car, AlertTriangle } from 'lucide-react';
+import { Store, Train, Car, AlertTriangle, Utensils } from 'lucide-react';
 
 export default function Navigation() {
   const pathname = usePathname();
 
+  // We added the Mess link right after Shops!
   const navItems = [
     { name: 'Shops', href: '/', icon: Store },
+    { name: 'Mess', href: '/mess', icon: Utensils },
     { name: 'Trains', href: '/trains', icon: Train },
     { name: 'Cabs', href: '/transport', icon: Car },
     { name: 'Reports', href: '/complaints', icon: AlertTriangle },
@@ -16,7 +18,7 @@ export default function Navigation() {
 
   return (
     <>
-      {/* DESKTOP SIDEBAR (Hidden on mobile) */}
+      {/* DESKTOP SIDEBAR */}
       <nav className="hidden md:flex flex-col fixed left-0 top-0 h-screen w-64 bg-surface border-r border-border-subtle p-6 z-50">
         <h1 className="text-2xl font-bold text-white mb-10 tracking-tight">IITP Hub</h1>
         <div className="flex flex-col gap-2">
@@ -41,9 +43,9 @@ export default function Navigation() {
         </div>
       </nav>
 
-      {/* MOBILE BOTTOM NAVIGATION (Premium Touch Setup) */}
+      {/* MOBILE BOTTOM NAVIGATION */}
       <nav className="md:hidden fixed bottom-0 left-0 w-full bg-surface/95 backdrop-blur-xl border-t border-border-subtle z-50 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.3)]">
-        <div className="flex justify-between items-center h-20 px-2">
+        <div className="flex justify-between items-center h-20 px-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
@@ -52,12 +54,10 @@ export default function Navigation() {
               <Link 
                 key={item.name} 
                 href={item.href}
-                // flex-1 and h-full makes the ENTIRE block clickable, not just the icon!
                 className="flex-1 h-full flex flex-col items-center justify-center group"
-                style={{ WebkitTapHighlightColor: 'transparent' }} // Removes the ugly blue Android box
+                style={{ WebkitTapHighlightColor: 'transparent' }}
               >
-                {/* The "Bubble" that squishes when tapped */}
-                <div className={`flex flex-col items-center justify-center w-16 h-10 rounded-2xl transition-all duration-200 ease-out group-active:scale-75 group-active:bg-white/20 ${
+                <div className={`flex flex-col items-center justify-center w-14 h-10 rounded-2xl transition-all duration-200 ease-out group-active:scale-75 group-active:bg-white/20 ${
                   isActive ? 'bg-accent/15 text-accent shadow-inner' : 'text-text-secondary bg-transparent'
                 }`}>
                   <Icon 
@@ -66,8 +66,7 @@ export default function Navigation() {
                   />
                 </div>
                 
-                {/* The tiny text below the icon */}
-                <span className={`text-[11px] font-medium mt-1.5 transition-colors duration-200 ${
+                <span className={`text-[10px] font-medium mt-1.5 transition-colors duration-200 ${
                   isActive ? 'text-accent' : 'text-text-secondary'
                 }`}>
                   {item.name}
