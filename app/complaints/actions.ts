@@ -1,19 +1,28 @@
-'use server'
-import { appendSheetData } from '../../lib/google-sheets';
+'use server';
+
+import { appendSheetData } from '@/lib/google-sheets';
 
 export async function submitComplaint(formData: FormData) {
-  const title = formData.get('title') as string;
-  const description = formData.get('description') as string;
-  const imageUrl = formData.get('imageUrl') as string || ''; // Optional field
+  // Extract the specific fields from the updated form
+  const name = formData.get('name') as string;
+  const room = formData.get('room') as string;
+  const category = formData.get('category') as string;
+  const issue = formData.get('issue') as string;
   
-  // Get current time in India (Timestamp)
-  const timestamp = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+  // Create a timestamp in IST
+  const now = new Date();
+  const istTime = now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
 
-  // Add a new row to the "Complaints" tab matching your exactly columns:
-  // Timestamp | Title | Description | Image URL | Status
-  const success = await appendSheetData('Complaints!A:E', [
-    [timestamp, title, description, imageUrl, 'Pending']
-  ]);
-  
-  return { success };
+  try {
+    // Append the row to Google Sheets
+    // Make sure your sheet is named "Complaints" and has columns for these values!
+    await appendSheetData('Complaints!A:E', [
+      [istTime, name, room, category, issue, "Pending"]
+    ]);
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to submit complaint:", error);
+    return { success: false, error: "Failed to save complaint to database" };
+  }
 }

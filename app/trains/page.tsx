@@ -1,93 +1,153 @@
-import { getSheetData } from '../../lib/google-sheets';
-import { Clock, Calendar } from 'lucide-react';
+'use client';
 
-export const dynamic = 'force-dynamic';
+import { useState, useEffect } from 'react';
+import { Clock, Calendar, ArrowRightLeft, Loader2, Train as TrainIcon } from 'lucide-react';
 
-export default async function TrainsPage() {
-  const rows = await getSheetData('Trains!A2:E'); 
+export interface TrainData {
+  number: string;
+  name: string;
+  src: string;
+  dst: string;
+  time: string;
+  displayTime?: string;
+  day?: string;
+  sortValue?: number;
+}
 
-  // 1. Get current time in Indian Standard Time (IST)
-  const now = new Date();
-  const istTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-  const currentMinutes = istTime.getHours() * 60 + istTime.getMinutes();
+export default function TrainsPage() {
+  const [direction, setDirection] = useState<'BTA_PNBE' | 'PNBE_BTA'>('BTA_PNBE');
+  const [trains, setTrains] = useState<TrainData[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // 2. Process and filter the trains
-  const processedTrains = rows.map((train) => {
-    const name = train[0];
-    const number = train[1];
-    const timeString = train[4]; // Example: "14:30"
-
-    if (!timeString || !name) return null;
-
-    const [hours, minutes] = timeString.split(':').map(Number);
-    const trainMinutes = hours * 60 + minutes;
-
-    // Determine if the train is for Today or Tomorrow
-    let day = "Today";
-    let sortValue = trainMinutes;
-
-    if (trainMinutes < currentMinutes) {
-      day = "Tomorrow";
-      sortValue += 24 * 60; // Add 24 hours to push it to the bottom
+  useEffect(() => {
+    async function fetchTrains() {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/trains?direction=${direction}`);
+        const json = await res.json();
+        
+        if (json.success && Array.isArray(json.data)) {
+          processAndSetTrains(json.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch trains API", error);
+      }
+      setLoading(false);
     }
+    
+    fetchTrains();
+  }, [direction]);
 
-    // Format time to standard 12-hour AM/PM format for a better UI
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    const displayHour = hours % 12 || 12;
-    const displayTime = `${displayHour}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+  function processAndSetTrains(rawTrains: TrainData[]) {
+    const now = new Date();
+    const istTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+    const currentMinutes = istTime.getHours() * 60 + istTime.getMinutes();
 
-    return { name, number, displayTime, day, sortValue };
-  }).filter(Boolean);
+    const processed = rawTrains.map((train): TrainData => {
+      // Provide a fallback in case time is missing
+      const timeString = train.time || "00:00"; 
+      const [hours, minutes] = timeString.split(':').map(Number);
+      const trainMinutes = (hours || 0) * 60 + (minutes || 0);
 
-  // 3. Sort trains so the soonest upcoming ones are at the top
-  processedTrains.sort((a, b) => a!.sortValue - b!.sortValue);
+      let day = "Today";
+      let sortValue = trainMinutes;
+
+      if (trainMinutes < currentMinutes) {
+        day = "Tomorrow";
+        sortValue += 24 * 60; // push to bottom
+      }
+
+      const ampm = (hours || 0) >= 12 ? 'PM' : 'AM';
+      const displayHour = (hours || 0) % 12 || 12;
+      const displayMinutes = (minutes || 0).toString().padStart(2, '0');
+      const displayTime = `${displayHour}:${displayMinutes} ${ampm}`;
+
+      return {
+        number: train.number,
+        name: train.name,
+        src: train.src,
+        dst: train.dst,
+        time: train.time,
+        displayTime,
+        day,
+        sortValue
+      };
+    });
+
+    processed.sort((a, b) => (a.sortValue || 0) - (b.sortValue || 0));
+    setTrains(processed);
+  }
 
   return (
     <div className="min-h-screen p-6 md:p-12 max-w-3xl mx-auto pb-32">
-      <header className="mb-10 mt-4 md:mt-0">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Train Schedule</h1>
-        <p className="text-text-secondary">Bihta Station ➔ Patna Junction</p>
+      <header className="mb-8 mt-4 md:mt-0 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">Live Train Schedule</h1>
+          <p className="text-text-secondary">Official local timings via API.</p>
+        </div>
+        
+        {/* Direction Toggle */}
+        <div className="flex bg-surface-hover p-1 rounded-xl border border-border-subtle shrink-0">
+          <button 
+            onClick={() => setDirection('BTA_PNBE')}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${direction === 'BTA_PNBE' ? 'bg-accent text-white shadow-md' : 'text-text-secondary hover:text-white'}`}
+          >
+            Bihta <ArrowRightLeft size={14} /> Patna
+          </button>
+          <button 
+            onClick={() => setDirection('PNBE_BTA')}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${direction === 'PNBE_BTA' ? 'bg-accent text-white shadow-md' : 'text-text-secondary hover:text-white'}`}
+          >
+            Patna <ArrowRightLeft size={14} /> Bihta
+          </button>
+        </div>
       </header>
 
-      {processedTrains.length === 0 ? (
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-20 text-text-secondary">
+          <Loader2 className="animate-spin mb-4" size={32} />
+          <p>Fetching live schedule...</p>
+        </div>
+      ) : trains.length === 0 ? (
         <div className="bg-surface/50 border border-border-subtle p-8 rounded-3xl text-center">
-          <p className="text-text-secondary">No trains found. Please check the Google Sheet.</p>
+          <p className="text-text-secondary">No trains found for this route.</p>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {processedTrains.map((train, index) => (
-            <div key={index} className={`group bg-surface border border-border-subtle p-5 rounded-2xl flex justify-between items-center hover:bg-surface-hover transition-colors ${train!.day === 'Tomorrow' ? 'opacity-60' : ''}`}>
-              
-              {/* Left Side: Train Number & Name */}
-              <div className="flex flex-col gap-1">
+          {trains.map((train, index) => (
+            <div key={index} className={`group bg-surface border border-border-subtle p-5 rounded-2xl flex justify-between items-center hover:bg-surface-hover transition-colors shadow-lg ${train.day === 'Tomorrow' ? 'opacity-60' : ''}`}>  
+              <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-3">
-                  <span className="bg-accent/10 text-accent text-xs px-2 py-1 rounded-md font-mono font-bold tracking-wider">
-                    {train!.number}
+                  <span className="bg-accent/10 text-accent text-xs px-2.5 py-1 rounded-md font-mono font-bold tracking-wider border border-accent/20">
+                    {train.number}
                   </span>
-                  <h3 className="font-semibold text-white text-lg tracking-tight">
-                    {train!.name}
+                  <h3 className="font-semibold text-white text-lg tracking-tight flex items-center gap-2">
+                    <TrainIcon size={18} className="text-text-secondary hidden md:block" />
+                    {train.name}
                   </h3>
                 </div>
                 
-                {/* Day Tag (Today / Tomorrow) */}
-                <div className="flex items-center gap-1.5 mt-1">
-                  <Calendar size={14} className={train!.day === 'Today' ? 'text-green-400' : 'text-text-secondary'} />
-                  <span className={`text-sm font-medium ${train!.day === 'Today' ? 'text-green-400' : 'text-text-secondary'}`}>
-                    {train!.day}
-                  </span>
+                <div className="flex items-center gap-4 mt-1">
+                  <div className="flex items-center gap-1.5">
+                    <Calendar size={14} className={train.day === 'Today' ? 'text-green-400' : 'text-text-secondary'} />
+                    <span className={`text-sm font-medium ${train.day === 'Today' ? 'text-green-400' : 'text-text-secondary'}`}>  
+                      {train.day}
+                    </span>
+                  </div>
+                  <div className="text-xs text-text-secondary font-medium bg-bg-main px-2 py-0.5 rounded border border-border-subtle">
+                    {train.src} ➔ {train.dst}
+                  </div>
                 </div>
               </div>
 
-              {/* Right Side: Time Box aligned perfectly */}
               <div className="flex flex-col items-end">
-                <div className="flex items-center gap-2 bg-surface-hover border border-border-subtle px-4 py-2.5 rounded-xl">
-                  <Clock size={16} className={train!.day === 'Today' ? 'text-white' : 'text-text-secondary'} />
-                  <span className={`text-xl font-bold tracking-tight ${train!.day === 'Today' ? 'text-white' : 'text-text-secondary'}`}>
-                    {train!.displayTime}
+                <div className="flex items-center gap-2 bg-bg-main border border-border-subtle px-4 py-2.5 rounded-xl shadow-inner">
+                  <Clock size={16} className={train.day === 'Today' ? 'text-white' : 'text-text-secondary'} />
+                  <span className={`text-xl font-bold tracking-tight ${train.day === 'Today' ? 'text-white' : 'text-text-secondary'}`}>  
+                    {train.displayTime}
                   </span>
                 </div>
               </div>
-
             </div>
           ))}
         </div>

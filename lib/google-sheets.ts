@@ -1,6 +1,5 @@
 import { google } from 'googleapis';
 
-// We removed the ".readonly" from the scope so the app can now WRITE data!
 const getAuth = () => {
   const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
   return new google.auth.GoogleAuth({
@@ -8,11 +7,11 @@ const getAuth = () => {
       client_email: process.env.GOOGLE_CLIENT_EMAIL,
       private_key: privateKey,
     },
+    // Removed .readonly so we can write to the sheet
     scopes: ['https://www.googleapis.com/auth/spreadsheets'], 
   });
 };
 
-// Function to READ data
 export async function getSheetData(range: string) {
   try {
     const auth = getAuth();
@@ -28,7 +27,6 @@ export async function getSheetData(range: string) {
   }
 }
 
-// NEW Function to WRITE data
 export async function appendSheetData(range: string, values: any[][]) {
   try {
     const auth = getAuth();
