@@ -31,9 +31,8 @@ export default function ComplaintsPage() {
   }, [activeTab, deviceId]);
 
   async function handleSubmit(formData: FormData) {
-    setStatus('loading');
-    await submitComplaint(formData, deviceId);
     setStatus('success');
+    submitComplaint(formData, deviceId);
   }
 
   const getStatusStyle = (currentStatus: string) => {
@@ -74,7 +73,7 @@ export default function ComplaintsPage() {
               <CheckCircle2 size={32} className="text-emerald-500" />
             </div>
             <h2 className="text-[18px] font-semibold text-white mb-1">Issue Reported</h2>
-            <p className="text-[13px] text-text-secondary mb-6">Your report was saved privately.</p>
+            <p className="text-[13px] text-text-secondary mb-6">Your report was saved and I will look into it.</p>
             <button onClick={() => setStatus('idle')} className="bg-surface-hover text-white w-full py-2.5 rounded-xl text-[14px] font-semibold border border-border-subtle active:scale-[0.98] transition-transform">
               Submit Another
             </button>
