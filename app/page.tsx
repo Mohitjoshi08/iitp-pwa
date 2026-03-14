@@ -13,7 +13,7 @@ export default async function Home() {
         <span className="text-sm text-white">
           This resource portal is brought to you by{' '}
           <a 
-            href="https://your-link.com" 
+            href="https://www.instagram.com/mohit_for_swb?igsh=MTBxd3Q3cnB6aDUzZw==" 
             target="_blank" 
             rel="noopener noreferrer"
             className="underline decoration-accent underline-offset-4 hover:text-accent transition-colors"
