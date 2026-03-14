@@ -90,6 +90,17 @@ export default function ComplaintsPage() {
               <textarea required name="description" rows={3} placeholder="Details about the problem..." className="bg-bg-main border border-border-subtle rounded-xl p-3 text-[14px] text-white focus:outline-none focus:border-accent transition-colors resize-none"></textarea>
             </div>
             <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-medium text-text-secondary ml-1">Contact Number <span className="text-red-500">*</span></label>
+              <input
+                required
+                name="contact"
+                type="text"
+                placeholder="Your contact number"
+                className="bg-bg-main border border-border-subtle rounded-xl p-3 text-[14px] text-white focus:outline-none focus:border-accent transition-colors"
+              />
+              <span className="text-[11px] text-text-secondary ml-1 mt-0.5">We may call if more info is needed. Include +91 if desired.</span>
+            </div>
+            <div className="flex flex-col gap-1.5">
               <label className="text-[12px] font-medium text-text-secondary ml-1">Image URL <span className="opacity-50">(Optional)</span></label>
               <input name="imageUrl" type="url" placeholder="Link to image" className="bg-bg-main border border-border-subtle rounded-xl p-3 text-[14px] text-white focus:outline-none focus:border-accent transition-colors" />
             </div>
@@ -116,6 +127,7 @@ export default function ComplaintsPage() {
               const timestamp = issue[0] || "Unknown Date";
               const title = issue[1] || "Untitled";
               const description = issue[2] || "No description.";
+              const contact = issue[3] || ""; // Show contact if available
               const currentStatus = issue[4] || "Pending";
 
               return (
@@ -129,6 +141,11 @@ export default function ComplaintsPage() {
                   <p className="text-text-secondary text-[13px] leading-relaxed line-clamp-2">
                     {description}
                   </p>
+                  {contact && (
+                    <div className="flex items-center gap-1 mt-1 text-[12px] text-accent font-semibold">
+                      Contact: <span className="ml-0.5">{contact}</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-1.5 mt-1 pt-2 border-t border-border-subtle/50 text-[11px] text-text-secondary font-medium">
                     <Clock size={12} />
                     {timestamp}

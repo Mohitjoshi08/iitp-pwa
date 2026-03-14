@@ -4,27 +4,30 @@ import { appendSheetData, getSheetData } from '../../lib/google-sheets';
 export async function submitComplaint(formData: FormData, deviceId: string) {
   const title = formData.get('title') as string;
   const description = formData.get('description') as string;
-  const imageUrl = formData.get('imageUrl') as string || ''; 
-  
+  const contact = formData.get('contact') as string;           // NEW: get contact number
+  const imageUrl = formData.get('imageUrl') as string || '';
+
   const timestamp = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
 
-  // Notice we changed A:E to A:F to include the hidden deviceId
-  const success = await appendSheetData('Complaints!A:F', [
-    [timestamp, title, description, imageUrl, 'Pending', deviceId]
+  // Now saving contact number in column D, so columns are:
+  // [timestamp, title, description, contact, imageUrl, status, deviceId]
+  // So the sheet range must go A:G (7 columns)
+  const success = await appendSheetData('Complaints!A:G', [
+    [timestamp, title, description, contact, imageUrl, 'Pending', deviceId]
   ]);
-  
+
   return { success };
 }
 
 export async function getComplaints(deviceId: string) {
   if (!deviceId) return [];
   
-  // Read all data up to Column F
-  const data = await getSheetData('Complaints!A2:F');
-  
-  // FILTER: Only keep rows where Column F (index 5) matches the user's Device ID
-  const userComplaints = data.filter(row => row[5] === deviceId);
-  
+  // Now columns are up to G so grab all data
+  const data = await getSheetData('Complaints!A2:G');
+
+  // FILTER: Only keep rows where Column G (index 6) matches the user's Device ID
+  const userComplaints = data.filter(row => row[6] === deviceId);
+
   // Reverse so newest is on top
   return userComplaints.reverse();
 }
