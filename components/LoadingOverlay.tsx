@@ -12,7 +12,7 @@ export default function LoadingOverlay() {
 
     // When path changes, show loading for minimum 750ms (nice effect)
     setLoading(true);
-    timeout = setTimeout(() => setLoading(false), 750);
+    timeout = setTimeout(() => setLoading(false), 1000);
 
     return () => clearTimeout(timeout);
     // eslint-disable-next-line
@@ -29,7 +29,7 @@ export default function LoadingOverlay() {
         <div className="bg-accent/90 px-7 py-4 rounded-2xl shadow-xl text-center">
           <h2 className="text-2xl font-bold text-white">Loading...</h2>
           <p className="mt-2 text-lg text-white/90 font-bold">
-            Mohit for SWB <span className="text-xs align-super bg-white/10 px-2 py-0.5 rounded text-accent-light ml-2">Student Welfare Board</span>
+            Mohit for SWB 
           </p>
         </div>
       </div>

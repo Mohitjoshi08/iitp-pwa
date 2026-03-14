@@ -4,7 +4,7 @@ import Navigation from "../components/Navigation";
 import LoadingOverlay from "../components/LoadingOverlay";
 
 export const metadata: Metadata = {
-  title: "IITP Hub | Campus App",
+  title: "IITP SWB | Campus App",
   description: "Your ultimate IIT Patna campus companion",
   manifest: "/manifest.json",
   appleWebApp: {
