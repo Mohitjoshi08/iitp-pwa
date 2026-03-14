@@ -7,7 +7,6 @@ const getAuth = () => {
       client_email: process.env.GOOGLE_CLIENT_EMAIL,
       private_key: privateKey,
     },
-    // Removed .readonly so we can write to the sheet
     scopes: ['https://www.googleapis.com/auth/spreadsheets'], 
   });
 };
