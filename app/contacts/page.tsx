@@ -4,7 +4,6 @@ import { Phone, User, BadgeInfo, Users } from 'lucide-react';
 export const dynamic = 'force-dynamic';
 
 export default async function ContactsPage() {
-  // Columns: Name | Person | Phone | Extra Info
   const rows = await getSheetData('Contacts!A2:D');
 
   return (
@@ -50,6 +49,14 @@ export default async function ContactsPage() {
           })}
         </div>
       )}
+
+      {/* --- Creator Credit Section --- */}
+      <div className="bg-accent/10 border border-accent/30 p-3.5 rounded-2xl text-center mt-8">
+        <span className="font-bold text-accent">Website by Mohit Joshi</span>
+        <span className="block text-xs text-text-secondary mt-1">
+          Nominee for SWB (Student Welfare Board)
+        </span>
+      </div>
     </div>
   );
 }

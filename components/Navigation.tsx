@@ -2,12 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Store, Train, Car, AlertTriangle, Utensils } from 'lucide-react';
-import { BadgeInfo } from 'lucide-react'
+import { Store, Car, AlertTriangle, BadgeInfo } from 'lucide-react';
+
 export default function Navigation() {
   const pathname = usePathname();
 
-  // We added the Mess link right after Shops!
   const navItems = [
     { name: 'Shops', href: '/', icon: Store },
     { name: 'Mess', href: '/mess', icon: Utensils },
@@ -26,12 +25,12 @@ export default function Navigation() {
             const isActive = pathname === item.href;
             const Icon = item.icon;
             return (
-              <Link 
-                key={item.name} 
+              <Link
+                key={item.name}
                 href={item.href}
                 className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 active:scale-95 ${
-                  isActive 
-                    ? 'bg-accent/10 text-accent font-semibold' 
+                  isActive
+                    ? 'bg-accent/10 text-accent font-semibold'
                     : 'text-text-secondary hover:bg-surface-hover hover:text-white'
                 }`}
               >
@@ -49,26 +48,34 @@ export default function Navigation() {
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
-            
+
             return (
-              <Link 
-                key={item.name} 
+              <Link
+                key={item.name}
                 href={item.href}
                 className="flex-1 h-full flex flex-col items-center justify-center group"
                 style={{ WebkitTapHighlightColor: 'transparent' }}
               >
-                <div className={`flex flex-col items-center justify-center w-14 h-10 rounded-2xl transition-all duration-200 ease-out group-active:scale-75 group-active:bg-white/20 ${
-                  isActive ? 'bg-accent/15 text-accent shadow-inner' : 'text-text-secondary bg-transparent'
-                }`}>
-                  <Icon 
-                    size={22} 
-                    className={`transition-transform duration-300 ${isActive ? 'scale-110 stroke-[2.5px]' : 'scale-100 stroke-2'}`} 
+                <div
+                  className={`flex flex-col items-center justify-center w-14 h-10 rounded-2xl transition-all duration-200 ease-out group-active:scale-75 group-active:bg-white/20 ${
+                    isActive
+                      ? 'bg-accent/15 text-accent shadow-inner'
+                      : 'text-text-secondary bg-transparent'
+                  }`}
+                >
+                  <Icon
+                    size={22}
+                    className={`transition-transform duration-300 ${
+                      isActive ? 'scale-110 stroke-[2.5px]' : 'scale-100 stroke-2'
+                    }`}
                   />
                 </div>
-                
-                <span className={`text-[10px] font-medium mt-1.5 transition-colors duration-200 ${
-                  isActive ? 'text-accent' : 'text-text-secondary'
-                }`}>
+
+                <span
+                  className={`text-[10px] font-medium mt-1.5 transition-colors duration-200 ${
+                    isActive ? 'text-accent' : 'text-text-secondary'
+                  }`}
+                >
                   {item.name}
                 </span>
               </Link>

@@ -1,41 +1,24 @@
-import type { Metadata, Viewport } from "next";
-import "./globals.css";
-import Navigation from "../components/Navigation";
+import './globals.css'
+import Navigation from '../components/Navigation'
 
-export const metadata: Metadata = {
-  title: "IITP Hub | Campus App",
-  description: "Your ultimate IIT Patna campus companion",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "IITP Hub",
-  },
-};
-
-export const viewport: Viewport = {
-  themeColor: "#09090b",
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <head>
-        <link rel="apple-touch-icon" href="/file.svg" />
-      </head>
-      <body className="antialiased bg-[#09090b] text-white">
+      <body>
+        {children}
+
+        {/* --- Campaign Fixed Badge --- */}
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 pointer-events-none">
+          <div className="bg-accent/90 text-white shadow-lg px-4 py-2 rounded-full flex items-center gap-2 text-sm font-semibold border border-accent/50 animate-in fade-in duration-300 pointer-events-auto">
+            <span>
+              Made for IITP Students by <span className="underline decoration-white/60 underline-offset-4">Mohit Joshi</span>
+            </span>
+            <span className="ml-2 bg-white/20 rounded px-2 py-0.5 text-xs font-bold tracking-wide">SWB Candidate</span>
+          </div>
+        </div>
+        {/* --- End Campaign Badge --- */}
+
         <Navigation />
-        <main className="md:ml-64 pb-20 md:pb-0 min-h-screen">
-          {children}
-        </main>
       </body>
     </html>
   );
