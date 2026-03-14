@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Store, Train, Car, AlertTriangle, Utensils } from 'lucide-react';
-
+import { BadgeInfo } from 'lucide-react'
 export default function Navigation() {
   const pathname = usePathname();
 
@@ -12,6 +12,7 @@ export default function Navigation() {
     { name: 'Shops', href: '/', icon: Store },
     { name: 'Mess', href: '/mess', icon: Utensils },
     { name: 'Cabs', href: '/transport', icon: Car },
+    { name: 'Contacts', href: '/contacts', icon: BadgeInfo },
     { name: 'Reports', href: '/complaints', icon: AlertTriangle },
   ];
 
