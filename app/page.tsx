@@ -2,83 +2,50 @@ import { getSheetData } from '../lib/google-sheets';
 
 export const dynamic = 'force-dynamic';
 
-// Helper to robustly parse TRUE/FALSE for Auto Open/Close
-const isTrue = (value) =>
-  typeof value === 'string'
-    ? ['true', 'yes', '1'].includes(value.trim().toLowerCase())
-    : !!value;
-
 // Helper to check if current time is between open/close (24h format)
-function isOpenBetween(openTime, closeTime, now = new Date()) {
-  if (!openTime || !closeTime) return false;
+function isOpenBetween_e(openTime_e, closeTime_e, now_e = new Date()) {
+  if (!openTime_e || !closeTime_e) return false;
   
   try {
-    const [openHour, openMinute] = openTime.split(':').map(Number);
-    const [closeHour, closeMinute] = closeTime.split(':').map(Number);
+    const [openHour_e, openMinute_e] = openTime_e.split(':').map(Number);
+    const [closeHour_e, closeMinute_e] = closeTime_e.split(':').map(Number);
 
-    const nowMinutes = now.getHours() * 60 + now.getMinutes();
-    const openMinutes = openHour * 60 + openMinute;
-    const closeMinutes = closeHour * 60 + closeMinute;
+    const nowMinutes_e = now_e.getHours() * 60 + now_e.getMinutes();
+    const openMinutes_e = openHour_e * 60 + openMinute_e;
+    const closeMinutes_e = closeHour_e * 60 + closeMinute_e;
 
-    if (closeMinutes < openMinutes) {
-      // Over midnight
-      return nowMinutes >= openMinutes || nowMinutes < closeMinutes;
+    if (closeMinutes_e < openMinutes_e) {
+      // Over midnight logic (e.g., 21:00 to 05:00)
+      return nowMinutes_e >= openMinutes_e || nowMinutes_e < closeMinutes_e;
     }
-    // Normal
-    return nowMinutes >= openMinutes && nowMinutes < closeMinutes;
-  } catch (e) {
-    return false; // Fail gracefully if a cell has bad formatting
+    // Normal logic
+    return nowMinutes_e >= openMinutes_e && nowMinutes_e < closeMinutes_e;
+  } catch (err_e) {
+    return false; // Fail gracefully if formatting is bad
   }
 }
 
-function getShopStatus(shop, now = new Date()) {
-  const autoOpen = isTrue(shop[1]);
-  const autoClose = isTrue(shop[2]);
-  const mode = (shop[3] || '').toLowerCase();
-  const manualStatus = (shop[4] || '').toUpperCase();
+function getShopStatus_e(shop_e, now_e) {
+  // shop_e[1] is Mode, shop_e[2] is Open Time, shop_e[3] is Close Time
+  const mode_e = (shop_e[1] || 'closed').trim().toLowerCase(); 
+  const openTime_e = shop_e[2] || '09:00';
+  const closeTime_e = shop_e[3] || '21:00';
+
+  // Explicit overrides
+  if (mode_e === 'open') return 'OPEN';
+  if (mode_e === 'closed') return 'CLOSED';
   
-  // Fallbacks in case cells are left completely empty
-  const openTime = shop[5] || '09:00';
-  const closeTime = shop[6] || '21:00';
-
-  if (mode === 'manual') {
-    return manualStatus === 'OPEN' ? 'OPEN' : 'CLOSED';
-  }
-
-  // AUTOMATION MODES
-  if (autoOpen && autoClose) {
-    return isOpenBetween(openTime, closeTime, now) ? 'OPEN' : 'CLOSED';
-  }
-
-  if (autoOpen && !autoClose) {
-    try {
-      const [openHour, openMinute] = openTime.split(':').map(Number);
-      const nowMinutes = now.getHours() * 60 + now.getMinutes();
-      const openMinutes = openHour * 60 + openMinute;
-      return nowMinutes >= openMinutes ? 'OPEN' : 'CLOSED';
-    } catch (e) { return 'CLOSED'; }
-  }
-
-  if (!autoOpen && autoClose) {
-    try {
-      const [closeHour, closeMinute] = closeTime.split(':').map(Number);
-      const nowMinutes = now.getHours() * 60 + now.getMinutes();
-      const closeMinutes = closeHour * 60 + closeMinute;
-      return nowMinutes < closeMinutes ? 'OPEN' : 'CLOSED';
-    } catch (e) { return 'CLOSED'; }
-  }
-
-  // Neither auto open/close: always closed
-  return 'CLOSED';
+  // 'auto' mode evaluation
+  return isOpenBetween_e(openTime_e, closeTime_e, now_e) ? 'OPEN' : 'CLOSED';
 }
 
 export default async function Home() {
-  // Read 7 columns per shop for automation
-  const rows = await getSheetData('Shops!A2:G');
+  // Fetch columns A through D
+  const rows_e = await getSheetData('Shops!A2:D');
   
-  // FIX: Force server date to evaluate in Indian Standard Time (IST)
-  const serverTime = new Date();
-  const now = new Date(serverTime.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+  // FIX: Force the server date to evaluate in Indian Standard Time (IST)
+  const serverTime_e = new Date();
+  const now_e = new Date(serverTime_e.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
 
   return (
     <div className="min-h-screen px-4 py-6 md:p-12 max-w-md mx-auto pb-28">
@@ -105,7 +72,7 @@ export default async function Home() {
         <p className="text-sm text-text-secondary mt-1">Real-time status of shops & eateries.</p>
       </header>
 
-      {!rows || rows.length === 0 ? (
+      {!rows_e || rows_e.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16">
           <span className="text-lg text-accent font-semibold mb-2">Fetching live data...</span>
           <span className="text-sm text-accent font-bold bg-accent/10 px-4 py-1 rounded-full border border-accent/30 shadow mt-2">
@@ -114,27 +81,40 @@ export default async function Home() {
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {rows.map((shop, index) => {
-            const shopName = shop[0] || "Unknown Shop";
-            const status = getShopStatus(shop, now);
-            const isOpen = status === 'OPEN';
-            const mode = (shop[3] || '').toLowerCase();
+          {rows_e.map((shop_e, index_e) => {
+            const shopName_e = shop_e[0] || "Unknown Shop";
+            const mode_e = (shop_e[1] || 'auto').trim().toLowerCase();
+            const openTime_e = shop_e[2] || '09:00';
+            const closeTime_e = shop_e[3] || '21:00';
+
+            const status_e = getShopStatus_e(shop_e, now_e);
+            const isOpen_e = status_e === 'OPEN';
+
+            // DYNAMIC BADGE LOGIC: Show timings if auto, otherwise show manual status
+            const displayMode_e = mode_e === 'auto' 
+              ? `${openTime_e} - ${closeTime_e}`
+              : `Manual ${mode_e === 'open' ? 'Open' : 'Closed'}`;
 
             return (
-              <div key={index} className="bg-surface border border-border-subtle p-3.5 rounded-2xl flex justify-between items-center active:scale-[0.98] transition-transform">
+              <div key={index_e} className="bg-surface border border-border-subtle p-3.5 rounded-2xl flex justify-between items-center active:scale-[0.98] transition-transform">
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isOpen ? 'bg-green-500/10' : 'bg-surface-hover'}`}>
-                    <span className={isOpen ? 'text-green-500' : 'text-text-secondary'}>🏪</span>
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isOpen_e ? 'bg-green-500/10' : 'bg-surface-hover'}`}>
+                    <span className={isOpen_e ? 'text-green-500' : 'text-text-secondary'}>🏪</span>
                   </div>
-                  <h2 className="text-[15px] font-semibold text-white tracking-tight">{shopName}</h2>
+                  <h2 className="text-[15px] font-semibold text-white tracking-tight">{shopName_e}</h2>
+                  
+                  {/* The small badge next to the name */}
                   <span className="ml-2 text-[10px] px-2 py-0.5 rounded bg-surface-hover text-text-secondary font-mono capitalize">
-                    {mode || 'auto'}
+                    {displayMode_e}
                   </span>
+                  
                 </div>
+                
+                {/* The big OPEN/CLOSED pill on the right */}
                 <div className={`px-3 py-1 rounded-lg text-[10px] font-bold tracking-widest uppercase ${
-                  isOpen ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/5 text-red-500/70 border border-red-500/10'
+                  isOpen_e ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/5 text-red-500/70 border border-red-500/10'
                 }`}>
-                  {status}
+                  {status_e}
                 </div>
               </div>
             );
