@@ -62,7 +62,7 @@ export default async function Home() {
           >
             Mohit Joshi
           </a>
-          , SWB (Student Welfare Board) Candidate.
+          , SWB (Student Welfare Board) Secretary
         </span>
       </div>
       {/* --- End Banner --- */}

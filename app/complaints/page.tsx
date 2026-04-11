@@ -112,7 +112,7 @@ export default function SuggestionsPage() { // Renamed component
                 placeholder="Your contact number"
                 className="bg-bg-main border border-border-subtle rounded-xl p-3 text-[14px] text-white focus:outline-none focus:border-accent transition-colors"
               />
-              <span className="text-[11px] text-text-secondary ml-1 mt-0.5">We may call if more info is needed. Include +91 if desired.</span>
+              <span className="text-[11px] text-text-secondary ml-1 mt-0.5">We may call if more info is needed.Don't Include +91.</span>
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="text-[12px] font-medium text-text-secondary ml-1">Image URL <span className="opacity-50">(Optional)</span></label>
