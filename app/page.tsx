@@ -48,24 +48,7 @@ export default async function Home() {
   const now_e = new Date(serverTime_e.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
 
   return (
-    <div className="min-h-screen px-4 py-6 md:p-12 max-w-md mx-auto pb-28">
-      {/* --- Campaign Welcome Banner --- */}
-      <div className="bg-surface-hover p-4 rounded-2xl border border-accent/40 mb-5 flex items-center gap-3 shadow-sm">
-        <span className="text-accent font-bold">Hi! 👋</span>
-        <span className="text-sm text-white">
-          This resource portal is brought to you by{' '}
-          <a 
-            href="https://www.instagram.com/mohit_for_swb?igsh=MTBxd3Q3cnB6aDUzZw==" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="underline decoration-accent underline-offset-4 hover:text-accent transition-colors"
-          >
-            Mohit Joshi
-          </a>
-          , SWB (Student Welfare Board) Secretary
-        </span>
-      </div>
-      {/* --- End Banner --- */}
+    
 
       <header className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight text-white">Campus Live</h1>
