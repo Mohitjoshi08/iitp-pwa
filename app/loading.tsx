@@ -8,9 +8,7 @@ export default function Loading() {
           <Loader2 className="animate-spin text-accent" size={24} />
         </div>
         <p className="text-text-secondary text-sm font-medium tracking-wide">Fetching live data...</p>
-        <p className="text-xs font-bold text-accent bg-accent/10 border border-accent/30 px-4 py-1 rounded-full mt-2 shadow">
-        
-        </p>
+       
       </div>
     </div>
   );
